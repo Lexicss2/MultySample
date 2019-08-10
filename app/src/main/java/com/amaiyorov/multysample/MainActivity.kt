@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
 
         MultySampleApplication.appComponent.inject(this)
         connectButton = findViewById(R.id.btn_connect)
-
-        bleDeviceApi.connect()
+        connectButton.setOnClickListener { bleDeviceApi.connect() }
     }
 }
