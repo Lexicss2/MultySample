@@ -1,6 +1,6 @@
 package com.amaiyorov.multysample.bluetooth
 
 interface BleDeviceApi {
-    fun connect()
+    fun connect(deviceName: String)
     fun disconnect()
 }
