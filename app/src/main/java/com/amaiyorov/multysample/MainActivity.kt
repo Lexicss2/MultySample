@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import com.amaiyorov.multysample.bluetooth.BleDeviceApi
 import com.amaiyorov.multysample.bluetooth.REQUEST_BT_CONNECT
 import com.amaiyorov.multysample.bluetooth.isBluetoothEnable
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var readButton: Button
     private lateinit var insertButton: Button
     private lateinit var bleEditText: EditText
+    private lateinit var temperatureTextView: TextView
 
     private lateinit var database: AppDatabase
 
@@ -53,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         bleEditText = findViewById(R.id.edt_ble_name)
+        temperatureTextView = findViewById(R.id.txt_temperature)
 
         readButton = findViewById(R.id.btn_read)
         readButton.setOnClickListener {
@@ -107,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun tryToConnect() {
         if (isBluetoothEnable(this)) {
-            bleDeviceApi.connect(bleEditText.text.toString())
+            bleDeviceApi.connect(bleEditText.text.toString(), notification)
         } else {
             requestBluetooth()
         }
@@ -128,8 +131,20 @@ class MainActivity : AppCompatActivity() {
         bluetoothOnRequested = false
         val result = resultCode == Activity.RESULT_OK && requestCode == REQUEST_BT_CONNECT
 
+
         if (result) {
-            bleDeviceApi.connect(bleEditText.text.toString())
+            bleDeviceApi.connect(bleEditText.text.toString(), notification)
         }
+    }
+
+
+    private val notification = object : ActivityNotification {
+        override fun onData(data: String) {
+            runOnUiThread { temperatureTextView.text = data }
+        }
+    }
+
+    interface ActivityNotification {
+        fun onData(data: String)
     }
 }

@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
@@ -24,6 +25,8 @@ class BluetoothService : Service() {
     private var bluetoothLeScanner: BluetoothLeScanner? = null
     private var isScanning: Boolean = false
 
+    private var notification: NebulizerDevice.Notification? = null
+
     private val leScanCallback = object : ScanCallback() {
 
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -32,7 +35,7 @@ class BluetoothService : Service() {
                 if (!devicesMap.contains(device.address)) {
                     val nebulizerDevice = NebulizerDevice(this@BluetoothService, device)
                     devicesMap[device.address] = nebulizerDevice
-                    nebulizerDevice.connect()
+                    nebulizerDevice.connect(notification)
                 }
             }
         }
@@ -53,15 +56,16 @@ class BluetoothService : Service() {
     }
 
     fun connect(address: String, notification: NebulizerDevice.Notification?): NebulizerDevice? {
+        this.notification = notification
         if (devicesMap.containsKey(address)) {
             _currentNebulizerDevice = devicesMap[address]
-            _currentNebulizerDevice?.connect()
+            _currentNebulizerDevice?.connect(notification)
         } else {
             bluetoothAdapter?.getRemoteDevice(address)?.let { device ->
                 val nebulizerDevice = NebulizerDevice(this, device)
                 //nebulizerDevice.setNotification()
                 devicesMap[address] = nebulizerDevice
-                nebulizerDevice.connect()
+                nebulizerDevice.connect(notification)
                 _currentNebulizerDevice = nebulizerDevice
             }
         }
@@ -88,8 +92,13 @@ class BluetoothService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.i("qaz", "onServiceCreated")
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.e("qaz", "onServiceDestroyed")
+    }
 
     // alternative connect
     private fun startScan() {

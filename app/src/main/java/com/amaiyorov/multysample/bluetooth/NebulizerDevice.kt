@@ -2,6 +2,7 @@ package com.amaiyorov.multysample.bluetooth
 
 import android.bluetooth.*
 import android.content.Context
+import android.util.Log
 import java.util.*
 
 class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
@@ -33,13 +34,17 @@ class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
     private var connectState = ConnectionState.DISCONNECTED
     private var bluetoothGattWrapper: BluetoothGattWrapper? = null
 
+    private var notification: NebulizerDevice.Notification? = null
+
     val gattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            Log.v("qaz", "onConnectionStateChanged: $newState")
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
                     setState(ConnectionState.CONNECTED)
-                    gatt?.discoverServices()
+                    val startDiscover = gatt?.discoverServices()
+                    Log.d("qaz", "start discover Services: $startDiscover")
                 }
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
@@ -55,8 +60,9 @@ class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 setState(ConnectionState.ACTIVE)
-                initDevice()
-
+                Log.i("qaz", "Services discovered")
+                //initDevice()
+                enableThermNotification(gatt!!)
             }
         }
 
@@ -87,10 +93,12 @@ class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
         }
     }
 
-    fun connect() {
+    fun connect(notification: NebulizerDevice.Notification?) {
         if (bluetoothGattWrapper != null && connectState != ConnectionState.DISCONNECTED) {
             return
         }
+
+        this.notification = notification
 
         address = device.address
         bluetoothGattWrapper = BluetoothGattWrapper(device)
@@ -116,6 +124,26 @@ class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
 
     }
 
+    private fun enableThermNotification(gatt: BluetoothGatt) {
+        gatt.services.forEach { service ->
+            service.characteristics.forEach { characteristic ->
+                val uuid = characteristic.uuid
+                if (NOTIFY_CHARACTERISTIC == uuid.toString()) {
+                    setThermCharacteristicsNotification(gatt, characteristic, true)
+                }
+            }
+        }
+    }
+
+    private fun setThermCharacteristicsNotification(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, enable: Boolean) {
+        gatt.setCharacteristicNotification(characteristic, enable)
+        val uuid = UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG)
+        val descriptor = characteristic.getDescriptor(uuid)
+        descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+        val wrote = gatt.writeDescriptor(descriptor)
+        Log.i("qaz", "Therm characteristics was wrote successfully: $wrote")
+    }
+
     private fun setCharacteristicNotification(
         gattWrapper: BluetoothGattWrapper,
         notifyCharacteristic: BluetoothGattCharacteristic,
@@ -134,14 +162,24 @@ class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
     }
 
     private fun onDataRead(characteristic: BluetoothGattCharacteristic) {
-        val fromUUid = characteristic.uuid.toString()
-        if (fromUUid.contains(NOTIFY_CHARACTERISTIC_UUID)) {
-            val buf = characteristic.value?.let { buf ->
-                val cmd = buf[0]
+//        val fromUUid = characteristic.uuid.toString()
+//        if (fromUUid.contains(NOTIFY_CHARACTERISTIC_UUID)) {
+//            val buf = characteristic.value?.let { buf ->
+//                val cmd = buf[0]
+//
+//                // TODO: Handle and Analyze buf array
+//            }
+//        }
 
-                // TODO: Handle and Analyze buf array
-            }
+        val data = characteristic.value
+        val dataString = String(data)
+        if (dataString.length > 7) {
+            val temperature = dataString.substring(2, 7)
+            Log.d("qaz", "temprature: $temperature")
+            notification?.onThermData(temperature)
         }
+
+        Log.i("qaz", "data extracted: $dataString (${dataString.length} bytes) " + data[3] + "," + data[4] + "," + data[5] + "," + data[6] + ", " + data[7])
     }
 
     private fun runCommand(byteCommand: Byte, callback: NebulizerCallback?) {
@@ -190,5 +228,7 @@ class NebulizerDevice(ctx: Context, device: BluetoothDevice) {
         fun onState(state: ConnectionState)
 
         fun onDeviceNotFound()
+
+        fun onThermData(data: String)
     }
 }

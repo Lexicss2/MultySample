@@ -12,6 +12,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
+import com.amaiyorov.multysample.MainActivity
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -25,7 +26,28 @@ class BleDeviceApiImpl(ctx: Context) : BleDeviceApi {
     private val context: Context = ctx
 
 
-    private var notification: NebulizerDevice.Notification? = null
+    private var notification: NebulizerDevice.Notification? = object : NebulizerDevice.Notification {
+
+        override fun onBatteryLevel(batteryLevel: Byte) {
+
+        }
+
+        override fun onNebulizationRate(nebulizationRate: Byte) {
+
+        }
+
+        override fun onState(state: ConnectionState) {
+
+        }
+
+        override fun onDeviceNotFound() {
+
+        }
+
+        override fun onThermData(data: String) {
+            activityNotification?.onData(data)
+        }
+    }
     private var bluetoothService: BluetoothService? = null
     private var serviceConnectionListener: OnServiceConnectionListener? = null
     private val serviceConnection = object : ServiceConnection {
@@ -50,6 +72,7 @@ class BleDeviceApiImpl(ctx: Context) : BleDeviceApi {
     private var bluetoothGatt: BluetoothGatt? = null
     private var isScanning: Boolean = false
     private var deviceName: String? = null
+    private var activityNotification: MainActivity.ActivityNotification? = null
 
     private val leScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -58,7 +81,8 @@ class BleDeviceApiImpl(ctx: Context) : BleDeviceApi {
                 if (result.device.name != null) {
                     if (result.device.name == name) {
                         Log.i("qaz", "deviceName found: $name")
-                        connectToService(name)
+                        val address = result.device.address
+                        connectToService(address)
                         stopScan()
                     }
                 }
@@ -75,8 +99,9 @@ class BleDeviceApiImpl(ctx: Context) : BleDeviceApi {
     }
 
 
-    override fun connect(deviceName: String) {
+    override fun connect(deviceName: String, notification: MainActivity.ActivityNotification?) {
         Log.i("qaz", "connect called")
+        activityNotification = notification
         this.deviceName = deviceName
         if (scanner == null) {
             scanner = bluetoothAdapter.bluetoothLeScanner
@@ -86,7 +111,7 @@ class BleDeviceApiImpl(ctx: Context) : BleDeviceApi {
             // discover
             startScan()
         } else {
-            bluetoothService!!.nebulizerDevice?.connect()
+            bluetoothService!!.nebulizerDevice?.connect(this.notification)
         }
     }
 
@@ -124,6 +149,7 @@ class BleDeviceApiImpl(ctx: Context) : BleDeviceApi {
     private fun stopScan() {
         Single.just(true)
             .map {
+                Log.d("qaz", "Stop scan scanner: $scanner" )
                 scanner!!.stopScan(leScanCallback)
             }
             .subscribeOn(Schedulers.io())
