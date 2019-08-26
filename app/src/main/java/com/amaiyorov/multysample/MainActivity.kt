@@ -6,7 +6,6 @@ import android.arch.persistence.room.Room
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -32,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var insertButton: Button
     private lateinit var bleEditText: EditText
     private lateinit var temperatureTextView: TextView
+    private lateinit var nameEditText: EditText
 
     private lateinit var database: AppDatabase
 
@@ -41,8 +41,6 @@ class MainActivity : AppCompatActivity() {
     // TODO: Unite to single status
     private var connectRequested: Boolean = false
     private var bluetoothOnRequested: Boolean = false
-
-    // TODO: Implement permissions for BLE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,21 +57,35 @@ class MainActivity : AppCompatActivity() {
 
         readButton = findViewById(R.id.btn_read)
         readButton.setOnClickListener {
-            val itemDao = database.getImemDao()
+            val itemDao = database.getItemDao()
             val items = itemDao.getItems()
             Log.d("qaz", "items read: ${items.size}")
+            items.forEach {
+                Log.v("qaz", "id = ${it.id}, name = ${it.name} / ${it.description}")
+            }
         }
 
         insertButton = findViewById(R.id.btn_insert)
         insertButton.setOnClickListener {
-            val itemDao = database.getImemDao()
-            val item = Item(1, "Alex", "lalalala", 10)
-            itemDao.insert(item)
-        }
+            val itemDao = database.getItemDao()
+//            val item = Item(0, "Alexandr", "------", 10)
+//            val item2 = Item(0, "aaa", "dff", 2)
+//            itemDao.insert(item)
+//            itemDao.insert(item2)
 
-//        database = Room.databaseBuilder(this, AppDatabase::class.java, "mydb")
-//            .allowMainThreadQueries()
-//            .build()
+            val name = nameEditText.text.toString()
+            if (!name.isBlank()) {
+                itemDao.insert(Item(0, name, "descr", 5))
+                nameEditText.clear()
+            }
+        }
+        nameEditText = findViewById(R.id.edt_name)
+
+        database = Room.databaseBuilder(this, AppDatabase::class.java, "mydb")
+            .allowMainThreadQueries()
+            .build()
+        // Use this example
+        // https://medium.com/mindorks/room-kotlin-android-architecture-components-71cad5a1bb35
     }
 
     override fun onStop() {
@@ -146,5 +158,9 @@ class MainActivity : AppCompatActivity() {
 
     interface ActivityNotification {
         fun onData(data: String)
+    }
+
+    fun EditText.clear() {
+        this.setText("")
     }
 }

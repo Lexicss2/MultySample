@@ -39,10 +39,20 @@
             android:layout_height="wrap_content"
             android:text="@string/read"/>
 
-    <Button
-            android:layout_width="wrap_content"
+    <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_insert"
-            android:text="@string/insert"/>
+            android:orientation="horizontal">
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_insert"
+                android:text="@string/insert"/>
+        <EditText
+                android:id="@+id/edt_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"/>
+    </LinearLayout>
 
 </LinearLayout>
