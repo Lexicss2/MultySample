@@ -17,6 +17,7 @@ import com.amaiyorov.multysample.bluetooth.REQUEST_BT_CONNECT
 import com.amaiyorov.multysample.bluetooth.isBluetoothEnable
 import com.amaiyorov.multysample.dagger.MultySampleApplication
 import com.amaiyorov.multysample.room.AppDatabase
+import com.amaiyorov.multysample.room.models.Gender
 import com.amaiyorov.multysample.room.models.Item
 import javax.inject.Inject
 
@@ -68,11 +69,6 @@ class MainActivity : AppCompatActivity() {
         insertButton = findViewById(R.id.btn_insert)
         insertButton.setOnClickListener {
             val itemDao = database.getItemDao()
-//            val item = Item(0, "Alexandr", "------", 10)
-//            val item2 = Item(0, "aaa", "dff", 2)
-//            itemDao.insert(item)
-//            itemDao.insert(item2)
-
             val name = nameEditText.text.toString()
             if (!name.isBlank()) {
                 itemDao.insert(Item(0, name, "descr", 5))
@@ -86,6 +82,21 @@ class MainActivity : AppCompatActivity() {
             .build()
         // Use this example
         // https://medium.com/mindorks/room-kotlin-android-architecture-components-71cad5a1bb35
+
+        // Run it in separate thread
+        val genderDao = database.genderDao()
+        var gender1 = Gender(name = "Male")
+        var gender2 = Gender(name = "Female")
+
+        genderDao.apply {
+            this.insertGender(gender1)
+            this.insertGender(gender2)
+
+            val genders = database.genderDao().getGenders()
+            genders.forEach {
+                Log.d("qaz", "gender: ${it.name}")
+            }
+        }
     }
 
     override fun onStop() {
