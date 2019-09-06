@@ -84,19 +84,19 @@ class MainActivity : AppCompatActivity() {
         // https://medium.com/mindorks/room-kotlin-android-architecture-components-71cad5a1bb35
 
         // Run it in separate thread
-        val genderDao = database.genderDao()
-        var gender1 = Gender(name = "Male")
-        var gender2 = Gender(name = "Female")
-
-        genderDao.apply {
-            this.insertGender(gender1)
-            this.insertGender(gender2)
-
-            val genders = database.genderDao().getGenders()
-            genders.forEach {
-                Log.d("qaz", "gender: ${it.name}")
-            }
-        }
+//        val genderDao = database.genderDao()
+//        var gender1 = Gender(name = "Male")
+//        var gender2 = Gender(name = "Female")
+//
+//        genderDao.apply {
+//            this.insertGender(gender1)
+//            this.insertGender(gender2)
+//
+//            val genders = database.genderDao().getGenders()
+//            genders.forEach {
+//                Log.d("qaz", "gender: ${it.name}")
+//            }
+//        }
     }
 
     override fun onStop() {
