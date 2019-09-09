@@ -16,9 +16,18 @@ import com.amaiyorov.multysample.bluetooth.BleDeviceApi
 import com.amaiyorov.multysample.bluetooth.REQUEST_BT_CONNECT
 import com.amaiyorov.multysample.bluetooth.isBluetoothEnable
 import com.amaiyorov.multysample.dagger.MultySampleApplication
+import com.amaiyorov.multysample.realm.Dog
+import com.amaiyorov.multysample.realm.Person
 import com.amaiyorov.multysample.room.AppDatabase
 import com.amaiyorov.multysample.room.models.Gender
 import com.amaiyorov.multysample.room.models.Item
+import io.realm.OrderedCollectionChangeSet
+import io.realm.OrderedRealmCollectionChangeListener
+import io.realm.Realm
+import io.realm.RealmResults
+import io.realm.kotlin.createObject
+import io.realm.kotlin.where
+import java.util.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bleEditText: EditText
     private lateinit var temperatureTextView: TextView
     private lateinit var nameEditText: EditText
+
+    private lateinit var tryRealmButton: Button
 
     private lateinit var database: AppDatabase
 
@@ -97,6 +108,67 @@ class MainActivity : AppCompatActivity() {
 //                Log.d("qaz", "gender: ${it.name}")
 //            }
 //        }
+
+        tryRealmButton = findViewById(R.id.btn_try_realm)
+        tryRealmButton.setOnClickListener {
+            val realm = Realm.getDefaultInstance()
+
+            val puppies = realm.where<Dog>().findAll()
+
+            puppies.addChangeListener(object :
+                OrderedRealmCollectionChangeListener<RealmResults<Dog>> {
+                override fun onChange(
+                    t: RealmResults<Dog>,
+                    changeSet: OrderedCollectionChangeSet
+                ) {
+                    val insertions = changeSet.insertions
+                    Log.i("qaz", "onChange in puppies, insertions: ${insertions.size}")
+                }
+            })
+
+            if (puppies.isEmpty()) {
+                Log.d("qaz", "No puppies, create one")
+
+                val dog = Dog().apply {
+                    name = "Rex"
+                    age = 1
+                }
+
+                realm.executeTransaction {
+                    try {
+                        realm.insert(dog)
+                        Log.i("qaz", "inserted ok in thread ${Thread.currentThread().name}")
+                    } catch (e: Exception) {
+                        Log.e("qaz", "Exception $e")
+                    }
+                }
+            } else {
+                Log.d("qaz", "we have puppies: ${puppies.size}")
+                puppies.forEach {
+                    Log.d("qaz", "puppie: ${it.name} , ${it.age}")
+                }
+            }
+
+
+            realm.executeTransaction {
+                val someDog = Dog().apply {
+                    age = 4
+                    name = "Sally"
+                }
+                val managedDog = realm.copyToRealm(someDog)
+                val randomUUID = Random().nextLong()//UUID.randomUUID().toString()
+                Log.d("qaz", "random UUID: $randomUUID")
+                val person = realm.createObject(Person::class.java, randomUUID)
+                person.dog = managedDog
+
+                try {
+                    realm.insert(person)
+                } catch ( e: Exception) {
+                    Log.e("qaz", "Failed insert person: ${e.localizedMessage}")
+                }
+
+            }
+        }
     }
 
     override fun onStop() {
@@ -104,8 +176,12 @@ class MainActivity : AppCompatActivity() {
         connectRequested = false
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when(requestCode) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
             PERMISSION_REQUEST_COARSE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (connectRequested) {
@@ -118,7 +194,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hasPermission(): Boolean =
-            this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     private fun handleConnect() {
         val permissions = listOf(Manifest.permission.ACCESS_COARSE_LOCATION)

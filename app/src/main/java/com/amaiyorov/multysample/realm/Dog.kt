@@ -2,4 +2,7 @@ package com.amaiyorov.multysample.realm
 
 import io.realm.RealmObject
 
-data class Dog(val name: String, val age: Int) : RealmObject()
+open class Dog() : RealmObject() {
+    var name: String? = null
+    var age: Int? = 0
+}

@@ -1,6 +1,7 @@
 package com.amaiyorov.multysample.dagger
 
 import android.app.Application
+import io.realm.Realm
 
 class MultySampleApplication : Application() {
 
@@ -24,5 +25,7 @@ class MultySampleApplication : Application() {
             .appModule(AppModule(this))
             .contextModule(ContextModule(this))
             .build()
+
+        Realm.init(this)
     }
 }
