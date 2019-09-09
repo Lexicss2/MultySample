@@ -171,6 +171,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // https://realm.io/docs/java/latest/
+    // here more about Realm
+
     override fun onStop() {
         super.onStop()
         connectRequested = false
