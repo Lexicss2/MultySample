@@ -1,4 +1,4 @@
-package com.amaiyorov.multysample.greendao;
+package com.amaiyorov.multysample.greendaopack;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;

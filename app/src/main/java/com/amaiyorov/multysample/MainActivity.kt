@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tryRealmButton: Button
 
     // GreenDao
+    private lateinit var greenDaoTextView: TextView
 
 
     private lateinit var database: AppDatabase
@@ -172,6 +173,16 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
+        }
+
+        // Put this in a different thread or use AsyncSession in greenDAO.
+        // For Demo purpose, this query is made on main thread but it should in a different thread.
+        val user = (application as MultySampleApplication).getDaoSession().userDao.load(1L)
+
+        greenDaoTextView = findViewById(R.id.green_dao_text_view)
+
+        if (user != null) {
+            greenDaoTextView.text = user.name
         }
     }
 

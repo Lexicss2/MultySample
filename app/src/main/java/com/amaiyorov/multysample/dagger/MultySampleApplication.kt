@@ -1,6 +1,11 @@
 package com.amaiyorov.multysample.dagger
 
 import android.app.Application
+import com.amaiyorov.multysample.greendaopack.DaoMaster
+import com.amaiyorov.multysample.greendaopack.DaoSession
+import com.amaiyorov.multysample.greendaopack.DbOpenHelper
+
+import com.amaiyorov.multysample.greendaopack.User
 import io.realm.Realm
 
 class MultySampleApplication : Application() {
@@ -16,6 +21,8 @@ class MultySampleApplication : Application() {
 
         val appComponent: AppComponent
             get() = _appComponent
+
+        private lateinit var daoSession: DaoSession
     }
 
     override fun onCreate() {
@@ -27,5 +34,15 @@ class MultySampleApplication : Application() {
             .build()
 
         Realm.init(this)
+
+        daoSession = DaoMaster(
+                DbOpenHelper(this, "greendao_demo.db").writableDb).newSession()
+
+        if (daoSession.userDao.loadAll().isEmpty()) {
+            daoSession.userDao.insert(User(1L, "Aaaaa Bbbbb", "", ""))
+        }
+
     }
+
+    fun getDaoSession(): DaoSession = daoSession
 }
