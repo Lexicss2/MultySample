@@ -43,7 +43,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var temperatureTextView: TextView
     private lateinit var nameEditText: EditText
 
+    // Realm
     private lateinit var tryRealmButton: Button
+
+    // GreenDao
+
 
     private lateinit var database: AppDatabase
 
@@ -173,6 +177,9 @@ class MainActivity : AppCompatActivity() {
 
     // https://realm.io/docs/java/latest/
     // here more about Realm
+
+    // https://blog.mindorks.com/powerful-android-orm-greendao-3-tutorial
+    // GreenDAO
 
     override fun onStop() {
         super.onStop()

@@ -70,9 +70,28 @@
 
         <Button
                 android:id="@+id/btn_try_realm"
-                android:text="insert"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:text="insert" />
     </LinearLayout>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="GreenDao" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <Button
+                android:id="@+id/btn_try_greendao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="insert" />
+    </LinearLayout>
+
 
 </LinearLayout>
