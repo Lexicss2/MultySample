@@ -4,4 +4,7 @@
     <string name="read">Read</string>
     <string name="insert">Insert</string>
     <string name="ble_default_name" translatable="false">AGUtherm2</string>
+
+    <string name="facebook_app_id">499218524249423</string> <string name="fb_login_protocol_scheme">fb499218524249423</string>
+
 </resources>

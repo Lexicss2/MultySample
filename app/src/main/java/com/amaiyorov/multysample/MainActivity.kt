@@ -21,6 +21,11 @@ import com.amaiyorov.multysample.realm.Person
 import com.amaiyorov.multysample.room.AppDatabase
 import com.amaiyorov.multysample.room.models.Gender
 import com.amaiyorov.multysample.room.models.Item
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginResult
+import com.facebook.login.widget.LoginButton
 import io.realm.OrderedCollectionChangeSet
 import io.realm.OrderedRealmCollectionChangeListener
 import io.realm.Realm
@@ -48,6 +53,9 @@ class MainActivity : AppCompatActivity() {
 
     // GreenDao
     private lateinit var greenDaoTextView: TextView
+
+    // FB
+    private lateinit var fbLoginButton: LoginButton
 
 
     private lateinit var database: AppDatabase
@@ -184,6 +192,26 @@ class MainActivity : AppCompatActivity() {
         if (user != null) {
             greenDaoTextView.text = user.name
         }
+
+
+        // continue https://developers.facebook.com/docs/facebook-login/android
+        val callbackManager = CallbackManager.Factory.create()
+        fbLoginButton = findViewById(R.id.login_button)
+        fbLoginButton.setReadPermissions("email")
+        fbLoginButton.registerCallback(callbackManager, object: FacebookCallback<LoginResult> {
+            override fun onSuccess(result: LoginResult?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onCancel() {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onError(error: FacebookException?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+        })
+
     }
 
     // https://realm.io/docs/java/latest/
