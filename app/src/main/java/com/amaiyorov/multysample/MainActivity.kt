@@ -54,8 +54,9 @@ class MainActivity : AppCompatActivity() {
     // GreenDao
     private lateinit var greenDaoTextView: TextView
 
+    private lateinit var nextButton: Button
     // FB
-    private lateinit var fbLoginButton: LoginButton
+    //private lateinit var fbLoginButton: LoginButton
 
 
     private lateinit var database: AppDatabase
@@ -195,24 +196,13 @@ class MainActivity : AppCompatActivity() {
 
 
         // continue https://developers.facebook.com/docs/facebook-login/android
-        val callbackManager = CallbackManager.Factory.create()
-        fbLoginButton = findViewById(R.id.login_button)
-        fbLoginButton.setReadPermissions("email")
-        fbLoginButton.registerCallback(callbackManager, object: FacebookCallback<LoginResult> {
-            override fun onSuccess(result: LoginResult?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onCancel() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onError(error: FacebookException?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-        })
-
+        nextButton = findViewById(R.id.next_button)
+        nextButton.setOnClickListener {
+            val intent = Intent(MainActivity@this, SecondActivity::class.java)
+            startActivity(intent)
+        }
     }
+
 
     // https://realm.io/docs/java/latest/
     // here more about Realm
