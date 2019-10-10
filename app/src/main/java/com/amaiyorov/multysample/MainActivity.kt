@@ -210,6 +210,9 @@ class MainActivity : AppCompatActivity() {
     // https://blog.mindorks.com/powerful-android-orm-greendao-3-tutorial
     // GreenDAO
 
+
+    // FB key = RRH0fIHTQXGGOYrJuVMoBLPdLoc=
+
     override fun onStop() {
         super.onStop()
         connectRequested = false
