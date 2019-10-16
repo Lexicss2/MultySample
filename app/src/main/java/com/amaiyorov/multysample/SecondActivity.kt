@@ -66,19 +66,30 @@ class SecondActivity : AppCompatActivity() {
             .setContentUrl(Uri.parse("tut.by"))
             .build()
 
+        val image = BitmapFactory.decodeResource(resources, R.drawable.aaa)
+        val photo = SharePhoto.Builder()
+            .setBitmap(image)
+            .build()
+        val photoContent = SharePhotoContent.Builder()
+            .addPhoto(photo)
+            .build()
+
 //
-//        val shareContent = ShareMediaContent.Builder()
+//        val mediaContent = ShareMediaContent.Builder()
 //            .addMedium(sharedPhoto)
 //            .build()
+
 //
 //        val shareDialog = ShareDialog(this)
 //        shareDialog.show(shareContent, ShareDialog.Mode.AUTOMATIC)
 
         shareButton = findViewById(R.id.share_button)
-        shareButton.shareContent = linkContent
+        //shareButton.shareContent = linkContent
+        shareButton.shareContent = photoContent
 
         firstButton = findViewById(R.id.first_button)
         firstButton.setOnClickListener {
+            Log.d("qaz", "tryShare clicked")
             sharePhotoToFacebook()
         }
     }
