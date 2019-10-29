@@ -22,6 +22,7 @@ import com.twitter.sdk.android.core.Result
 import com.twitter.sdk.android.core.TwitterCore
 import com.twitter.sdk.android.core.TwitterException
 import com.twitter.sdk.android.core.TwitterSession
+import com.twitter.sdk.android.core.identity.TwitterAuthClient
 import com.twitter.sdk.android.core.identity.TwitterLoginButton
 
 // Facebook Tutorial
@@ -36,6 +37,21 @@ class SecondActivity : AppCompatActivity() {
     private lateinit var facebookCallbackManager: CallbackManager
 
     private lateinit var twitterLoginButton: TwitterLoginButton
+    private lateinit var twitterCustomLoginButton: Button
+
+    private val twitterAuthCallback = object : com.twitter.sdk.android.core.Callback<TwitterSession>() {
+
+        override fun success(result: Result<TwitterSession>?) {
+            Log.d("qaz", "Twitter success, result: ${result.toString()}")
+            twitterCustomLoginButton.text = "Logged In"
+
+        }
+
+        override fun failure(exception: TwitterException) {
+            Log.d("qaz", "Twitter failure: ${exception.localizedMessage}")
+            twitterCustomLoginButton.text = "Log In"
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,15 +79,11 @@ class SecondActivity : AppCompatActivity() {
         }
 
         twitterLoginButton = findViewById(R.id.twitter_login_button)
-        twitterLoginButton.callback = object : com.twitter.sdk.android.core.Callback<TwitterSession>() {
-
-            override fun success(result: Result<TwitterSession>?) {
-                Log.d("qaz", "Twitter success, result: ${result?.data}")
-            }
-
-            override fun failure(exception: TwitterException) {
-                Log.d("qaz", "Twitter failure: ${exception.localizedMessage}")
-            }
+        twitterLoginButton.callback = twitterAuthCallback
+        twitterCustomLoginButton = findViewById(R.id.twitter_custom_login_button)
+        twitterCustomLoginButton.setOnClickListener {
+            val client = TwitterAuthClient()
+            client.authorize(this, twitterAuthCallback)
         }
 
         val accessToken = AccessToken.getCurrentAccessToken()
@@ -126,6 +138,8 @@ class SecondActivity : AppCompatActivity() {
         } else {
             Log.w("qaz", "TwitterSession is null")
         }
+
+        //val cl = TwitterAuthClient()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
