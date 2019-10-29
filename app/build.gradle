@@ -62,6 +62,13 @@ dependencies {
     implementation 'com.facebook.android:facebook-login:[5,6)'
     implementation 'com.facebook.android:facebook-share:[5,6)'
 
+
+    compile 'com.twitter.sdk.android:twitter-core:3.1.1'
+    compile 'com.twitter.sdk.android:tweet-ui:3.1.1'
+    compile 'com.twitter.sdk.android:tweet-composer:3.1.1'
+    // (Optional) Monetize using mopub
+    implementation 'com.twitter.sdk.android:twitter-mopub:3.1.1'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

@@ -2,7 +2,6 @@ package com.amaiyorov.multysample
 
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -16,28 +15,38 @@ import com.facebook.login.LoginResult
 import com.facebook.login.widget.LoginButton
 import com.facebook.share.ShareApi
 import com.facebook.share.model.ShareLinkContent
-import com.facebook.share.model.ShareMediaContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.SharePhotoContent
 import com.facebook.share.widget.ShareButton
-import com.facebook.share.widget.ShareDialog
+import com.twitter.sdk.android.core.Result
+import com.twitter.sdk.android.core.TwitterCore
+import com.twitter.sdk.android.core.TwitterException
+import com.twitter.sdk.android.core.TwitterSession
+import com.twitter.sdk.android.core.identity.TwitterLoginButton
 
+// Facebook Tutorial
+// https://developers.facebook.com/docs/sharing/android/
+// https://developers.facebook.com/docs/sharing/android/
+
+// Twitter Tutorial : https://github.com/twitter-archive/twitter-kit-android/wiki/Log-In-with-Twitter
 class SecondActivity : AppCompatActivity() {
     private lateinit var fbLoginButton: LoginButton
     private lateinit var shareButton: ShareButton
     private lateinit var firstButton: Button
-    private lateinit var callbackManager: CallbackManager
+    private lateinit var facebookCallbackManager: CallbackManager
+
+    private lateinit var twitterLoginButton: TwitterLoginButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_second)
 
-        callbackManager = CallbackManager.Factory.create()
-        fbLoginButton = findViewById(R.id.login_button)
+        facebookCallbackManager = CallbackManager.Factory.create()
+        fbLoginButton = findViewById(R.id.facebook_login_button)
         fbLoginButton.apply {
             setReadPermissions("email")
-            registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            registerCallback(facebookCallbackManager, object : FacebookCallback<LoginResult> {
                 override fun onSuccess(result: LoginResult?) {
                     Log.i("qaz", "Success")
                     sharePhotoToFacebook()
@@ -53,12 +62,24 @@ class SecondActivity : AppCompatActivity() {
             })
         }
 
+        twitterLoginButton = findViewById(R.id.twitter_login_button)
+        twitterLoginButton.callback = object : com.twitter.sdk.android.core.Callback<TwitterSession>() {
+
+            override fun success(result: Result<TwitterSession>?) {
+                Log.d("qaz", "Twitter success, result: ${result?.data}")
+            }
+
+            override fun failure(exception: TwitterException) {
+                Log.d("qaz", "Twitter failure: ${exception.localizedMessage}")
+            }
+        }
+
         val accessToken = AccessToken.getCurrentAccessToken()
         val isLoggedIn = accessToken != null && !accessToken.isExpired
         if (isLoggedIn) {
-            Log.i("qaz", "Logged In")
+            Log.i("qaz", "Logged In facebook")
         } else {
-            Log.d("qaz", "not logged in")
+            Log.d("qaz", "not logged in facebook")
         }
 
 
@@ -92,12 +113,26 @@ class SecondActivity : AppCompatActivity() {
             Log.d("qaz", "tryShare clicked")
             sharePhotoToFacebook()
         }
+
+
+        val twitterSession = TwitterCore.getInstance().sessionManager.activeSession
+        if (twitterSession != null) {
+            val authToken = twitterSession.authToken
+            if (authToken != null) {
+                Log.d("qaz", "token: ${authToken.token}, secret: ${authToken.secret}, expired: ${authToken.isExpired}")
+            } else {
+                Log.w("qaz", "auth token is null")
+            }
+        } else {
+            Log.w("qaz", "TwitterSession is null")
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.i("qaz", "onActivityResult")
-        callbackManager.onActivityResult(requestCode, resultCode, data)
+        Log.i("qaz", "onActivityResult, requestCode: $requestCode")
+        facebookCallbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
+        twitterLoginButton.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun sharePhotoToFacebook() {
